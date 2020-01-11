@@ -3,10 +3,9 @@
 ## Getting started 
 
 ```
-$ cd pet-shop
+$ cd pet-shop/auth-system
 $ npm install
-$ npm start
-
+$ node server.js
 ```
 
 
