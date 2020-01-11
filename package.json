@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/cfereday/pet-shop/issues"
   },
-  "homepage": "https://github.com/cfereday/pet-shop#readme"
+  "homepage": "https://github.com/cfereday/pet-shop#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
