@@ -7,6 +7,20 @@ const jwt = require('jsonwebtoken');
 //allows app to use json from body that gets passed in from request
 app.use(express.json());
 
+//normally store tokens in db or redis cache - for purpose of tutorial storing stuff in an array but in real thing best thing is db / redis cache
+let refreshTokens = [];
+app.post('/token', (req, res) => {
+    const refreshToken = req.body.token;
+    if (refreshToken == null) return res.sendStatus(401);
+    if (!refreshTokens.includes(refreshToken)) res.sendStatus(403);
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+        if (err) return re.sendStatus(403);
+        // extract out only relevant data
+        const accessToken = generateAccessToken({ name: user.name });
+        res.json({ accessToken: accessToken })
+    })
+});
+
 app.post('/login', (req, res) => {
     // authenticate user checking password done here
 
@@ -23,6 +37,7 @@ app.post('/login', (req, res) => {
     //same user is inside both tokens
     //manually handle expiration time on refreshToken rather than setting a time - want to manage it ourselves
     const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
+    refreshTokens.push(refreshToken);
     res.json( { accessToken: accessToken, refreshToken: refreshToken });
 });
 
