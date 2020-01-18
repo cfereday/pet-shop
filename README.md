@@ -19,5 +19,6 @@ Ton run another example using JWT web tokens
 ```
 $ cd nodejs-authentication
 $ npm install
-$ node server.js
+$ env:myprivatekey = "myprivatekey"
+$ node index.js
 ```
