@@ -18,8 +18,9 @@ const posts = [
     }
 ];
 
-app.get('/posts', (req, res) => {
-    res.json(posts);
+app.get('/posts', authenticateToken, (req, res) => {
+    console.log('req.user.name', req.user.name);
+    res.json(posts.filter(post => post.username === req.user.name));
 });
 
 app.post('/login', (req, res) => {
@@ -27,6 +28,7 @@ app.post('/login', (req, res) => {
 
     //authenticate & use JWT
     const username = req.body.username;
+    //value serialised
     const user = { name: username };
 
     // payload = what we want to serialise
@@ -37,4 +39,16 @@ app.post('/login', (req, res) => {
     res.json( { accessToken: accessToken });
 });
 
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    // token will be undefined or the token
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token == null) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next()
+    });
+}
 app.listen(3000);
