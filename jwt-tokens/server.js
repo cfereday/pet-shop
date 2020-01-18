@@ -23,22 +23,6 @@ app.get('/posts', authenticateToken, (req, res) => {
     res.json(posts.filter(post => post.username === req.user.name));
 });
 
-app.post('/login', (req, res) => {
-    // authenticate user checking password done here
-
-    //authenticate & use JWT
-    const username = req.body.username;
-    //value serialised
-    const user = { name: username };
-
-    // payload = what we want to serialise
-    // secret key to serialise
-    //can also add expiration date
-    // accessToken will have user info saved in it
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-    res.json( { accessToken: accessToken });
-});
-
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     // token will be undefined or the token
