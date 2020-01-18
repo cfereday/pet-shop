@@ -21,6 +21,13 @@ app.post('/token', (req, res) => {
     })
 });
 
+// allows delete refresh tokens so a user can't infinitely have access
+// normally you'd delete from a db
+app.delete('/logout', (req, res) => {
+    refreshTokens = refreshTokens.filter(token => token !== req.body.token);
+    res.sendStatus(204);
+});
+
 app.post('/login', (req, res) => {
     // authenticate user checking password done here
 
