@@ -19,20 +19,16 @@ app.post('/login', (req, res) => {
     // secret key to serialise
     //can also add expiration date
     // accessToken will have user info saved in it
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-    res.json( { accessToken: accessToken });
+    const accessToken = generateAccessToken(user);
+    //same user is inside both tokens
+    //manually handle expiration time on refreshToken rather than setting a time - want to manage it ourselves
+    const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
+    res.json( { accessToken: accessToken, refreshToken: refreshToken });
 });
 
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    // token will be undefined or the token
-    const token = authHeader && authHeader.split(' ')[1];
-    if (token == null) return res.sendStatus(401);
+function generateAccessToken(user) {
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next()
-    });
+    // in a real app would want 10 - 15 mins expiry time
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15s'});
 }
 app.listen(4000);
