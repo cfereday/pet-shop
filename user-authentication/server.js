@@ -17,11 +17,12 @@ app.post('/users', async (req, res) => {
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
         console.log('salt', salt);
         console.log('hashed', hashedPassword);
-        const user = { name: req.body.name, password: hashedPasword };
+        const user = { name: req.body.name, password: hashedPassword };
         users.push(user);
-        res.status(201).send();
-    } catch {
-        req.status(500).send();
+        res.status(201).send('created password')
+    } catch(err) {
+        console.log('err',err);
+        req.status(500).send(JSON.stringify(err));
     }
 });
 
