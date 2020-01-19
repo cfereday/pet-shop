@@ -1,0 +1,23 @@
+{
+  "name": "shop",
+  "version": "1.0.0",
+  "description": "An app to learn more about authentication & authorisation",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm t"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/cfereday/pet-shop.git"
+  },
+  "keywords": [
+    "authentication",
+    "authorisation"
+  ],
+  "author": "Charlotte Fereday",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cfereday/pet-shop/issues"
+  },
+  "homepage": "https://github.com/cfereday/pet-shop#readme"
+}
