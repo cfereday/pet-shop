@@ -14,3 +14,6 @@ for [Windows](https://www.postgresqltutorial.com/install-postgresql/) and for [M
 
 `CREATE DATABASE shop;`
 `\c shop`
+
+## Fill in your credentials
+* Add your credentials to the `.env` file.
