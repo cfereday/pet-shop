@@ -1,14 +1,27 @@
-var pgp = require('pg-promise')(/* options */);
+// import pgp from 'pg-promise'
+require('dotenv').config();
+const {createDb, migrate} = require("postgres-migrations");
 
-const db = pgp({
+let databaseConfig = {
     database: 'shop',
-    port: process.env.DB_HOST,
+    port: 5432,
     user: process.env.DB_USER,
+    host: "localhost",
     password: process.env.DB_PASS
-});
+};
+// const db = pgp(databaseConfig);
 
-const table = new pgp.helpers.TableName({table: 'authorisation',
-    schema: 'username varchar NOT NULL; password varchar NOT NULL;'});
-console.log('created new table ', table);
+async function create() {
+    return await createDb('shop', {
+        ...databaseConfig,
+        defaultDatabase: "postgres",
+    });
+}
+async function migrateDb() {
+    return await migrate(databaseConfig, "./store/migrations");
+}
 
-module.exports = db;
+module.exports = {
+    create,
+    migrateDb
+};
