@@ -22,4 +22,15 @@ app.get('/registration', (req, res) => {
     });
 });
 
+app.post('/log-in', (req, res) => {
+    res.sendFile(__dirname + '/public/login.html', function (err) {
+        if (err) {
+            next(err);
+            console.log('Unable to load login page', err.status)
+        } else {
+            console.log('Successfully on logon  page');
+        }
+    });
+});
+
 f.then(() => app.listen(4000));
