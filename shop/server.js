@@ -9,7 +9,6 @@ let f = (async () => {
     await create();
     return await migrateDb();
 })();
-
 console.log('Finished migrating db');
 
 app.get('/registration', (req, res) => {
