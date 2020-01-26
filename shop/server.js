@@ -25,6 +25,7 @@ app.get('/registration', (req, res) => {
 app.post('/log-in', (req, res) => {
     res.sendFile(__dirname + '/public/login.html', function (err) {
         if (err) {
+            res.redirect(301, '/registration');
             next(err);
             console.log('Unable to load login page', err.status)
         } else {
