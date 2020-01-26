@@ -12,9 +12,15 @@ let f = (async () => {
 
 console.log('Finished migrating db');
 
-app.get('/', (req, res) => {
-    res.sendStatus(200);
+app.get('/registration', (req, res) => {
+    res.sendFile(__dirname + '/public/registration.html', function (err) {
+        if (err) {
+            next(err);
+            console.log('Unable to load registration page', err.status)
+        } else {
+            console.log('Successfully loaded registration page');
+        }
+    });
 });
 
 f.then(() => app.listen(4000));
-
