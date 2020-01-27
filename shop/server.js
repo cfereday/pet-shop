@@ -1,3 +1,5 @@
+const { sequelize } = require("./model/user");
+
 const {create, migrateDb} = require("./store/db");
 const express = require('express');
 const app = express();
@@ -17,6 +19,14 @@ app.get('/registration', (req, res) => {
             next(err);
             console.log('Unable to load registration page', err.status)
         } else {
+            sequelize
+                .authenticate()
+                .then(() => {
+                    console.log('Connection has been established successfully.');
+                })
+                .catch(err => {
+                    console.error('Unable to connect to the database:', err);
+                });
             console.log('Successfully loaded registration page');
         }
     });

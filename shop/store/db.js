@@ -1,4 +1,5 @@
 // import pgp from 'pg-promise'
+const {experiment} = require("../model/user");
 require('dotenv').config();
 const {createDb, migrate} = require("postgres-migrations");
 
@@ -10,7 +11,6 @@ let databaseConfig = {
     password: process.env.DB_PASS
 };
 // const db = pgp(databaseConfig);
-
 async function create() {
     return await createDb('shop', {
         ...databaseConfig,
@@ -18,6 +18,7 @@ async function create() {
     });
 }
 async function migrateDb() {
+    experiment();
     return await migrate(databaseConfig, "./store/migrations");
 }
 
