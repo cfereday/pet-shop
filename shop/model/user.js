@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@localhost.com:5432/shop');
 
-function experiment() {
-    sequelize
+async function connecting() {
+    return sequelize
         .authenticate()
         .then(() => {
             console.log('Connection has been established successfully.');
@@ -14,5 +14,5 @@ function experiment() {
 
 
 module.exports = {
-  experiment
+    connecting
 };

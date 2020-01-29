@@ -1,4 +1,4 @@
-const { sequelize } = require("./model/user");
+const {connecting} = require("./model/user");
 
 const {create, migrateDb} = require("./store/db");
 const express = require('express');
@@ -7,11 +7,16 @@ const app = express();
 app.use(express.json());
 app.set('port', 4000);
 
-let f = (async () => {
+let startDb = (async () => {
     await create();
     return await migrateDb();
 })();
 console.log('Finished migrating db');
+
+let createUser = (async () => {
+       return await connecting();
+});
+console.log('Finished connecting to sequelize');
 
 app.get('/registration', (req, res) => {
     res.sendFile(__dirname + '/public/registration.html', function (err) {
@@ -19,14 +24,6 @@ app.get('/registration', (req, res) => {
             next(err);
             console.log('Unable to load registration page', err.status)
         } else {
-            sequelize
-                .authenticate()
-                .then(() => {
-                    console.log('Connection has been established successfully.');
-                })
-                .catch(err => {
-                    console.error('Unable to connect to the database:', err);
-                });
             console.log('Successfully loaded registration page');
         }
     });
@@ -44,4 +41,4 @@ app.post('/log-in', (req, res) => {
     });
 });
 
-f.then(() => app.listen(4000));
+startDb.then(() => createUser.then(() => app.listen(4000)));
