@@ -1,4 +1,4 @@
-const {connecting} = require("./model/user");
+const {connecting, User, validateUser} = require("./model/user");
 
 const {create, migrateDb} = require("./store/db");
 const express = require('express');
@@ -26,6 +26,18 @@ app.get('/registration', (req, res) => {
         } else {
             console.log('Successfully loaded registration page');
         }
+    });
+}).post((req, res) => {
+    const {error} = validateUser(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+    User.create({
+        username: req.body.username,
+        password: req.body.password,
+    }).then(user => {
+        // req.session.user = user.dataValue;
+        res.redirect('/log-in')
+    }).catch(error => {
+        res.redirect('/registration');
     });
 });
 
