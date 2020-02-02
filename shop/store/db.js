@@ -1,19 +1,29 @@
 // import pgp from 'pg-promise'
-const {createDb, migrate} = require("postgres-migrations");
-const { databaseConfig } = require("config");
+const { createDb, migrate } = require('postgres-migrations');
+const { databaseConfig } = require('./config.js');
+const Sequelize = require('sequelize');
 
-// const db = pgp(databaseConfig);
+const dbAccess = new Sequelize(databaseConfig.database, databaseConfig.user, databaseConfig.password, {
+    ...databaseConfig,
+    dialect: 'postgres',
+    define: {
+        timestamps: false
+    },
+});
+
 async function create() {
     return await createDb('shop', {
         ...databaseConfig,
-        defaultDatabase: "postgres",
+        defaultDatabase: 'postgres',
     });
 }
+
 async function migrateDb() {
-    return await migrate(databaseConfig, "./store/migrations");
+    return await migrate(databaseConfig, './store/migrations');
 }
 
 module.exports = {
     create,
-    migrateDb
+    migrateDb,
+    dbAccess
 };
