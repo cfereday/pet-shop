@@ -30,17 +30,15 @@ app.route('/registration')
     const schema = Joi.object({
         username: Joi.string().min(3).max(50).required(),
         password: Joi.string().min(9).max(50).required()
-        });
+    });
 
     const validation = schema.validate(user);
     if (validation.error) {
         console.log('Invalid data request - something went wrong validating');
         res.redirect(301, '/something-went-wrong');
-        res.send(validation.error);
     } else {
         console.log('success you have a username & password that look ok');
-        res.redirect('/log-in');
-        res.send(validation);
+        res.redirect(301, '/log-in');
     }
 });
 
