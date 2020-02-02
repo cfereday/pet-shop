@@ -1,10 +1,12 @@
-const {connecting, User, validateUser} = require("./model/user");
+const {validateUser} = require("./model/user");
 
 const {create, migrateDb} = require("./store/db");
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
 
 app.use(express.json());
+app.use(bodyParser.urlencoded({extended: true}));
 app.set('port', 4000);
 
 let startDb = (async () => {
@@ -13,32 +15,21 @@ let startDb = (async () => {
 })();
 console.log('Finished migrating db');
 
-let createUser = (async () => {
-       return await connecting();
-});
-console.log('Finished connecting to sequelize');
-
-app.get('/registration', (req, res) => {
-    res.sendFile(__dirname + '/public/registration.html', function (err) {
-        if (err) {
-            next(err);
-            console.log('Unable to load registration page', err.status)
-        } else {
-            console.log('Successfully loaded registration page');
-        }
-    });
-}).post((req, res) => {
+app.route('/registration')
+    .get((req, res) => {
+        res.sendFile(__dirname + '/public/registration.html', function (err) {
+            if (err) {
+                console.log('Unable to load registration page', err.status)
+            } else {
+                console.log('Successfully loaded registration page');
+            }
+        })
+    }).post((req, res) => {
+    console.log('hey made it to post here is my req body', req.body);
     const {error} = validateUser(req.body);
+    console.log('errored', errpr);
     if (error) return res.status(400).send(error.details[0].message);
-    User.create({
-        username: req.body.username,
-        password: req.body.password,
-    }).then(user => {
-        // req.session.user = user.dataValue;
-        res.redirect('/log-in')
-    }).catch(error => {
-        res.redirect('/registration');
-    });
+    res.redirect('/log-in')
 });
 
 app.post('/log-in', (req, res) => {
@@ -53,4 +44,4 @@ app.post('/log-in', (req, res) => {
     });
 });
 
-startDb.then(() => createUser.then(() => app.listen(4000)));
+startDb.then(() => app.listen(4000));

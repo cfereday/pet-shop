@@ -3,6 +3,7 @@ const sequelize = new Sequelize('postgres://postgres:postgres@localhost.com:5432
 const Joi = require('@hapi/joi');
 
 async function connecting() {
+    console.log('sequelize*******************', sequelize);
     return sequelize
         .authenticate()
         .then(() => {
