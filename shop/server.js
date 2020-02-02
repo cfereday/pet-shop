@@ -24,19 +24,37 @@ app.route('/registration')
             }
         })
     }).post((req, res) => {
+
     console.log('hey made it to post registration here is my req body', req.body);
     const user = req.body;
-    options: {
-        validate: {
-            user: Joi.object({
-                username: Joi.string().min(3).max(50).required(),
-                password: Joi.string().min(9).max(250).required()
-            })
-        }
+    const schema = Joi.object({
+        username: Joi.string().min(3).max(50).required(),
+        password: Joi.string().min(9).max(50).required()
+        });
+
+    const validation = schema.validate(user);
+    if (validation.error) {
+        console.log('Invalid data request - something went wrong validating');
+        res.redirect(301, '/something-went-wrong');
+        res.send(validation.error);
+    } else {
+        console.log('success you have a username & password that look ok');
+        res.redirect('/log-in');
+        res.send(validation);
     }
-    console.log('success you have a username & password that look ok');
-    res.redirect('/log-in')
 });
+
+app.route('/something-went-wrong')
+    .get((req, res) => {
+        res.sendFile(__dirname + '/public/something-went-wrong.html', function (err) {
+            if (err) {
+                res.redirect(301, '/something-went-wrong.html');
+                console.log('Unable to load error page', err.status)
+            } else {
+                console.log('Successfully on error  page');
+            }
+        })
+    });
 
 
 app.route('/log-in')
@@ -44,7 +62,6 @@ app.route('/log-in')
         res.sendFile(__dirname + '/public/login.html', function (err) {
             if (err) {
                 res.redirect(301, '/registration');
-                next(err);
                 console.log('Unable to load login page', err.status)
             } else {
                 console.log('Successfully on login  page');
