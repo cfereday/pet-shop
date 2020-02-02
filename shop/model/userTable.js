@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@localhost:5432/shop');
+const bcrypt = require('bcrypt');
 
 function connecting() {
     const connected = sequelize.authenticate();
@@ -30,7 +31,8 @@ const userTable = sequelize.define('customer', {
             const salt = bcrypt.genSaltSync();
             user.password = bcrypt.hashSync(user.password, salt);
         }
-    }
+    },
+    freezeTableName: true
 });
 
 userTable.prototype.validPassword = function (password) {

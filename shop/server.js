@@ -1,5 +1,5 @@
 const {create, migrateDb} = require("./store/db");
-const { connecting } = require('./model/userTable');
+const { connecting, userTable } = require('./model/userTable');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -40,6 +40,8 @@ app.route('/registration')
     } else {
          connecting().then(() => {
              console.log('success you have a username & password that look ok');
+             console.log('validation', validation);
+             userTable.create(validation.value);
              res.redirect(301, '/log-in');
          }).catch((err) => {
              console.log('there was an error with sequelize', err);
