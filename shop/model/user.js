@@ -1,6 +1,5 @@
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@localhost.com:5432/shop');
-const Joi = require('@hapi/joi');
 
 async function connecting() {
     console.log('sequelize*******************', sequelize);
@@ -14,13 +13,13 @@ async function connecting() {
         });
 }
 
-const User =  sequelize.define('user', {
+const User = sequelize.define('user', {
     username: {
         type: Sequelize.STRING,
         unique: true,
         allowNull: false
     },
-    password:{
+    password: {
         type: Sequelize.STRING,
         allowNull: false
     },
@@ -33,16 +32,7 @@ const User =  sequelize.define('user', {
     }
 });
 
-function validateUser(user) {
-    const schemea = {
-      username: Joi.string().min(3).max(50).required(),
-      password: Joi.string().min(9).max(250).required()
-    };
-
-    return Joi.validate(user, schema);
-}
-
-User.prototype.validPassword = function(password) {
+User.prototype.validPassword = function (password) {
     return bcrypt.compareSync(password, this.password);
 };
 
@@ -54,5 +44,4 @@ sequelize.sync()
 module.exports = {
     connecting,
     User,
-    validateUser
 };

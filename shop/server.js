@@ -1,9 +1,8 @@
-const {validateUser} = require("./model/user");
-
 const {create, migrateDb} = require("./store/db");
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const Joi = require('@hapi/joi');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -25,23 +24,34 @@ app.route('/registration')
             }
         })
     }).post((req, res) => {
-    console.log('hey made it to post here is my req body', req.body);
-    const {error} = validateUser(req.body);
-    console.log('errored', errpr);
-    if (error) return res.status(400).send(error.details[0].message);
+    console.log('hey made it to post registration here is my req body', req.body);
+    const user = req.body;
+    options: {
+        validate: {
+            user: Joi.object({
+                username: Joi.string().min(3).max(50).required(),
+                password: Joi.string().min(9).max(250).required()
+            })
+        }
+    }
+    console.log('success you have a username & password that look ok');
     res.redirect('/log-in')
 });
 
-app.post('/log-in', (req, res) => {
-    res.sendFile(__dirname + '/public/login.html', function (err) {
-        if (err) {
-            res.redirect(301, '/registration');
-            next(err);
-            console.log('Unable to load login page', err.status)
-        } else {
-            console.log('Successfully on logon  page');
-        }
-    });
+
+app.route('/log-in')
+    .get((req, res) => {
+        res.sendFile(__dirname + '/public/login.html', function (err) {
+            if (err) {
+                res.redirect(301, '/registration');
+                next(err);
+                console.log('Unable to load login page', err.status)
+            } else {
+                console.log('Successfully on login  page');
+            }
+        })
+    }).post((req, res) => {
+    console.log('hey made it to post login here is my req body', req.body);
 });
 
 startDb.then(() => app.listen(4000));
