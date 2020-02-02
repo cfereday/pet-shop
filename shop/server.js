@@ -1,4 +1,5 @@
 const {create, migrateDb} = require("./store/db");
+const { connecting } = require('./model/userTable');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -37,8 +38,13 @@ app.route('/registration')
         console.log('Invalid data request - something went wrong validating');
         res.redirect(301, '/something-went-wrong');
     } else {
-        console.log('success you have a username & password that look ok');
-        res.redirect(301, '/log-in');
+         connecting().then(() => {
+             console.log('success you have a username & password that look ok');
+             res.redirect(301, '/log-in');
+         }).catch((err) => {
+             console.log('there was an error with sequelize', err);
+             res.sendStatus(500);
+         });
     }
 });
 

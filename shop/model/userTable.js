@@ -1,19 +1,20 @@
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('postgres://postgres:postgres@localhost.com:5432/shop');
+const sequelize = new Sequelize('postgres://postgres:postgres@localhost:5432/shop');
 
-async function connecting() {
-    console.log('sequelize*******************', sequelize);
-    return sequelize
-        .authenticate()
+function connecting() {
+    const connected = sequelize.authenticate();
+    return connected
         .then(() => {
             console.log('Connection has been established successfully.');
+            return true;
         })
         .catch(err => {
             console.error('Unable to connect to the database:', err);
+            return false;
         });
 }
 
-const User = sequelize.define('user', {
+const userTable = sequelize.define('customer', {
     username: {
         type: Sequelize.STRING,
         unique: true,
@@ -32,7 +33,7 @@ const User = sequelize.define('user', {
     }
 });
 
-User.prototype.validPassword = function (password) {
+userTable.prototype.validPassword = function (password) {
     return bcrypt.compareSync(password, this.password);
 };
 
@@ -43,5 +44,5 @@ sequelize.sync()
 
 module.exports = {
     connecting,
-    User,
+    userTable,
 };
