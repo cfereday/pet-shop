@@ -40,8 +40,40 @@ app.route('/registration')
     } else {
         console.log('success you have a username & password that look ok');
         userTable.create(validation.value);
-        res.redirect(301, '/log-in');
+        res.redirect(301, '/login');
     }
+});
+
+// when a user logs in need to check they are, who they say they are
+// we can authenticate via JWT
+// cookies -> create a user session cookie
+// add a session and do a JWT check as the cookie is created
+app.route('/login')
+    .get((req, res) => {
+        res.sendFile(__dirname + '/public/login.html', function (err) {
+            if (err) {
+                res.redirect(301, '/registration');
+                console.log('Unable to load login page: perhaps you need to register', err.status)
+            } else {
+                console.log('Successfully on login  page');
+            }
+        })
+    }).post((req, res) => {
+    console.log('hey made it to post login here is my req body', req.body);
+});
+
+app.route('/my-pet-shop')
+    .get((req, res) => {
+        res.sendFile(__dirname + '/public/my-pet-shop.html', function (err) {
+            if (err) {
+                res.redirect(301, '/login');
+                console.log('Unable to load login page', err.status)
+            } else {
+                console.log('Successfully on login  page');
+            }
+        })
+    }).post((req, res) => {
+    console.log('hey made it to post login here is my req body', req.body);
 });
 
 app.route('/something-went-wrong')
@@ -55,20 +87,5 @@ app.route('/something-went-wrong')
             }
         })
     });
-
-
-app.route('/log-in')
-    .get((req, res) => {
-        res.sendFile(__dirname + '/public/login.html', function (err) {
-            if (err) {
-                res.redirect(301, '/registration');
-                console.log('Unable to load login page', err.status)
-            } else {
-                console.log('Successfully on login  page');
-            }
-        })
-    }).post((req, res) => {
-    console.log('hey made it to post login here is my req body', req.body);
-});
 
 startDb.then(() => app.listen(4000));
