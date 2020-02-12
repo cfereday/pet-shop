@@ -1,5 +1,5 @@
 const {create, migrateDb} = require("./store/db");
-const {connecting, userTable} = require('./model/userTable');
+const {userTable} = require('./model/userTable');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -44,10 +44,6 @@ app.route('/registration')
     }
 });
 
-// when a user logs in need to check they are, who they say they are
-// we can authenticate via JWT
-// cookies -> create a user session cookie
-// add a session and do a JWT check as the cookie is created
 app.route('/login')
     .get((req, res) => {
         res.sendFile(__dirname + '/public/login.html', function (err) {
@@ -59,7 +55,28 @@ app.route('/login')
             }
         })
     }).post((req, res) => {
-    console.log('hey made it to post login here is my req body', req.body);
+    const inputUsername = req.body.username;
+    const inputPassword = req.body.password;
+
+    userTable.findAll({
+        where: {
+            username: inputUsername
+        }
+    }).then(function (users) {
+        const user = users[0];
+        if (!user) {
+            console.log('Could not find the user');
+            res.redirect(301, '/something-went-wrong');
+        } else {
+            if (user.validPassword(inputPassword)) {
+                console.log('successfully logged in');
+                res.redirect(301, '/my-pet-shop');
+            } else {
+                console.log('Could not find the password');
+                res.redirect(301, '/registration');
+            }
+        }
+    });
 });
 
 app.route('/my-pet-shop')

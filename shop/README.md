@@ -31,3 +31,6 @@ You can now start the app:
 
 ## Feedback
 All constructive & respectful feedback most welcome, feel free to open any issues / PRs. 
+
+
+https://dev.to/mr_cea/remaining-stateless-jwt-cookies-in-node-js-3lle
