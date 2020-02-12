@@ -1,4 +1,3 @@
-// import pgp from 'pg-promise'
 const { createDb, migrate } = require('postgres-migrations');
 const { databaseConfig } = require('./config.js');
 const Sequelize = require('sequelize');

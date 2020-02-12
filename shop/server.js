@@ -4,6 +4,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const Joi = require('@hapi/joi');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -14,6 +16,10 @@ let startDb = (async () => {
     return await migrateDb();
 })();
 console.log('Finished migrating db');
+
+function generateAccessToken(user) {
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'});
+}
 
 app.route('/registration')
     .get((req, res) => {
@@ -39,7 +45,8 @@ app.route('/registration')
         res.redirect(301, '/something-went-wrong');
     } else {
         console.log('success you have a username & password that look ok');
-        userTable.create(validation.value);
+        const token = generateAccessToken(validation.value);
+         userTable.create({accesstoken: token, ...validation.value});
         res.redirect(301, '/login');
     }
 });
@@ -57,6 +64,8 @@ app.route('/login')
     }).post((req, res) => {
     const inputUsername = req.body.username;
     const inputPassword = req.body.password;
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
     userTable.findAll({
         where: {
@@ -68,16 +77,23 @@ app.route('/login')
             console.log('Could not find the user');
             res.redirect(301, '/something-went-wrong');
         } else {
-            if (user.validPassword(inputPassword)) {
-                console.log('successfully logged in');
+            if (user.validPassword(inputPassword) && token != null) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+                        if (err) return res.redirect(301, '/something-went-wrong');
+                        req.user = user;
+                        console.log('successfully logged in');
+
+                    },
+                    res.json({accessToken: user.accessToken}));
                 res.redirect(301, '/my-pet-shop');
             } else {
-                console.log('Could not find the password');
-                res.redirect(301, '/registration');
+                console.log('Could not authenticate the token of the user');
+                res.redirect(301, '/something-went-wrong');
             }
         }
     });
-});
+})
+;
 
 app.route('/my-pet-shop')
     .get((req, res) => {

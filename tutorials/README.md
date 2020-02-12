@@ -27,7 +27,7 @@ $ node index.js
 ```
 
 
-# User Authentication
+# userTable Authentication
 This app was built following [this tutorial]( https://www.youtube.com/watch?v=Ud5xKCYQTjM) to build simple user authentication. 
 
 ```
