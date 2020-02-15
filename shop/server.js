@@ -70,6 +70,8 @@ app.route('/login')
         } else {
             if (user.validPassword(inputPassword)) {
                 console.log('successfully logged in');
+
+                res.cookie('petShopCookie', `${inputUsername}`, {expires: new Date(Date.now() + 900000)});
                 res.redirect(301, '/my-pet-shop');
             } else {
                 console.log('Could not find the password');
