@@ -24,13 +24,19 @@ for [Windows](https://www.postgresqltutorial.com/install-postgresql/) and for [M
 DB_USER='postgres'
 DB_PASS='postgres'
 ```
+* For the JWT authentication to work, some additional tokens will need to be added to the secret keys in the .env file. This can be done in the terminal in the following way:
+```
+$ node 
+$ require('crypto').randomBytes(64).toString('hex')
+```
+Replace the below values locally in the `.env` file.
 
+```
+ACCESS_TOKEN_SECRET='add yours here'
+REFRESH_TOKEN_SECRET='add yours here'
+```
 You can now start the app:
 `npm run devStart`
 
-
 ## Feedback
 All constructive & respectful feedback most welcome, feel free to open any issues / PRs. 
-
-
-https://dev.to/mr_cea/remaining-stateless-jwt-cookies-in-node-js-3lle
