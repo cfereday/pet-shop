@@ -4,6 +4,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const Joi = require('@hapi/joi');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -14,6 +16,17 @@ let startDb = (async () => {
     return await migrateDb();
 })();
 console.log('Finished migrating db');
+
+function generateAccessToken(user) {
+    const username = user.username;
+    const cookieInfo = {roles: 'user', username};
+    return jwt.sign(cookieInfo, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '2min'});
+}
+
+const createAuthCookie = (res, token) => {
+    console.log('token in cookie', token);
+    res.cookie('petShopAuthCookie', `${token}`, {expires: token.expiresIn, httpOnly: true});
+};
 
 app.route('/registration')
     .get((req, res) => {
@@ -57,6 +70,7 @@ app.route('/login')
     }).post((req, res) => {
     const inputUsername = req.body.username;
     const inputPassword = req.body.password;
+    let token;
 
     userTable.findAll({
         where: {
@@ -70,8 +84,9 @@ app.route('/login')
         } else {
             if (user.validPassword(inputPassword)) {
                 console.log('successfully logged in');
-
-                res.cookie('petShopCookie', `${inputUsername}`, {expires: new Date(Date.now() + 900000)});
+                token = generateAccessToken(user);
+                createAuthCookie(res, token);
+                console.log('successfully created cookie');
                 res.redirect(301, '/my-pet-shop');
             } else {
                 console.log('Could not find the password');
@@ -79,7 +94,8 @@ app.route('/login')
             }
         }
     });
-});
+})
+;
 
 app.route('/my-pet-shop')
     .get((req, res) => {
