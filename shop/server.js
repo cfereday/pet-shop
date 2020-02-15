@@ -28,6 +28,10 @@ const createAuthCookie = (res, token) => {
     res.cookie('petShopAuthCookie', `${token}`, {expires: token.expiresIn, httpOnly: true});
 };
 
+const removeAuthCookie = (res) => {
+    res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
+};
+
 const verifiedJwt = (token) => {
     try {
         return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -35,6 +39,25 @@ const verifiedJwt = (token) => {
         return false;
     }
 };
+
+function logout(res) {
+    res.sendFile(__dirname + '/public/logout.html', function (err) {
+        if (err) {
+            console.log('Unable to load logout page', err.status)
+        } else {
+            console.log('Successfully loaded logout page');
+        }
+    })
+}
+
+app.route('/logout')
+    .get((req, res) => {
+        logout(res);
+    })
+    .post((req, res) => {
+        removeAuthCookie(res);
+        logout(res);
+    });
 
 app.route('/registration')
     .get((req, res) => {
@@ -71,34 +94,36 @@ function showLogin(res) {
     })
 }
 
-app.route('/login')
-    .get((req, res) => {
-        let cookies = req.headers.cookie;
-        let allCookiesAsStrings = cookies.split('; ');
-        const matchedCookie = allCookiesAsStrings.filter(name => name.match(/petShopAuthCookie=./));
-        const tokenToVerify = matchedCookie[0].split('=')[1];
+app.route('/login').get((req, res) => {
+    let cookies = req.headers.cookie || "";
+    let allCookiesAsStrings = cookies.split('; ');
+    const matchedCookie = allCookiesAsStrings.find(name => name.match(/petShopAuthCookie=./));
 
-        if (matchedCookie && tokenToVerify) {
-            const verified = verifiedJwt(tokenToVerify);
-            if (verified) {
-                userTable.findAll({
-                    where: {
-                        username: verified.username
-                    }
-                }).then(function (users) {
-                    const user = users[0];
-                    if (!user) {
-                        showLogin(res)
-                    } else {
-                        console.log('successfully logged into shop via valid JWT & checking username in db');
-                        res.redirect(301, '/my-pet-shop');
-                    }
-                })
-            } else {
-                showLogin(res);
-            }
+    if (matchedCookie) {
+        const tokenToVerify = matchedCookie.split('=')[1];
+        const verified = verifiedJwt(tokenToVerify);
+        console.log('tokenToVerify', tokenToVerify);
+        if (verified) {
+            userTable.findAll({
+                where: {
+                    username: verified.username
+                }
+            }).then(function (users) {
+                const user = users[0];
+                if (!user) {
+                    showLogin(res)
+                } else {
+                    console.log('successfully logged into shop via valid JWT & checking username in db');
+                    res.redirect(301, '/my-pet-shop');
+                }
+            })
+        } else {
+            showLogin(res);
         }
-    }).post((req, res) => {
+    } else {
+        showLogin(res)
+    }
+}).post((req, res) => {
     const inputUsername = req.body.username;
     const inputPassword = req.body.password;
     let token;
