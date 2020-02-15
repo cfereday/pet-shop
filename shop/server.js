@@ -84,9 +84,25 @@ app.route('/login')
                         console.log('Successfully on login  page');
                     }
                 })
+            } else {
+                const jwtUsername = attemptedVerify.username;
+                userTable.findAll({
+                    where: {
+                        username: jwtUsername
+                    }
+                }).then(function (users) {
+                    const user = users[0];
+                    if (!user) {
+                        console.log('Could not find the username after validating JWT - going to registration page');
+                        res.redirect(301, '/registration');
+                    } else {
+                        console.log('successfully logged into shop via valid JWT & checking username in db');
+                        res.redirect(301, '/my-pet-shop');
+                    }
+
+                })
             }
         }
-
     }).post((req, res) => {
     const inputUsername = req.body.username;
     const inputPassword = req.body.password;
