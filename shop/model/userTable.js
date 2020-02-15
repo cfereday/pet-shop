@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
-const { dbAccess } = require('../store/db');
-const { Sequelize, DataTypes}= require('sequelize');
+const {dbAccess} = require('../store/db');
+const {Sequelize, DataTypes} = require('sequelize');
 
 const userTable = dbAccess.define('customer', {
-    user_id : {
-       type: DataTypes.INTEGER,
-        unique: true,
-        allowNull: false
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
     username: {
         type: DataTypes.STRING,
