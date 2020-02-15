@@ -12,10 +12,6 @@ const userTable = dbAccess.define('customer', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    accesstoken: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
 }, {
     hooks: {
         beforeCreate: (user) => {
