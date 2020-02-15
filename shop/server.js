@@ -28,6 +28,14 @@ const createAuthCookie = (res, token) => {
     res.cookie('petShopAuthCookie', `${token}`, {expires: token.expiresIn, httpOnly: true});
 };
 
+const verifiedJwt = (token) => {
+    try {
+        return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    } catch (err) {
+        return err;
+    }
+};
+
 app.route('/registration')
     .get((req, res) => {
         res.sendFile(__dirname + '/public/registration.html', function (err) {
@@ -59,14 +67,26 @@ app.route('/registration')
 
 app.route('/login')
     .get((req, res) => {
-        res.sendFile(__dirname + '/public/login.html', function (err) {
-            if (err) {
-                res.redirect(301, '/registration');
-                console.log('Unable to load login page: perhaps you need to register', err.status)
-            } else {
-                console.log('Successfully on login  page');
+        let cookies = req.headers.cookie;
+        let allCookiesAsStrings = cookies.split('; ');
+        const nameRegex = /petShopAuthCookie=./;
+        const matchedCookie = allCookiesAsStrings.filter(name => name.match(nameRegex));
+        const tokenToVerify = matchedCookie[0].split('=')[1];
+
+        if (matchedCookie && tokenToVerify) {
+            const attemptedVerify = verifiedJwt(tokenToVerify);
+            if (attemptedVerify instanceof Error) {
+                res.sendFile(__dirname + '/public/login.html', function (err) {
+                    if (err) {
+                        res.redirect(301, '/registration');
+                        console.log('Unable to load login page: perhaps you need to register', err.status)
+                    } else {
+                        console.log('Successfully on login  page');
+                    }
+                })
             }
-        })
+        }
+
     }).post((req, res) => {
     const inputUsername = req.body.username;
     const inputPassword = req.body.password;
