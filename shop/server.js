@@ -19,7 +19,7 @@ console.log('Finished migrating db');
 
 function generateAccessToken(user) {
     const username = user.username;
-    const cookieInfo = {roles: 'user', username};
+    const cookieInfo = {roles: ['user'], username};
     return jwt.sign(cookieInfo, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '2min'});
 }
 
@@ -32,7 +32,7 @@ const verifiedJwt = (token) => {
     try {
         return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     } catch (err) {
-        return err;
+        return false;
     }
 };
 
@@ -65,42 +65,37 @@ app.route('/registration')
     }
 });
 
+function showLogin(res) {
+    return res.sendFile(__dirname + '/public/login.html', function (err) {
+        console.log('Failed sending login  page', err);
+    })
+}
+
 app.route('/login')
     .get((req, res) => {
         let cookies = req.headers.cookie;
         let allCookiesAsStrings = cookies.split('; ');
-        const nameRegex = /petShopAuthCookie=./;
-        const matchedCookie = allCookiesAsStrings.filter(name => name.match(nameRegex));
+        const matchedCookie = allCookiesAsStrings.filter(name => name.match(/petShopAuthCookie=./));
         const tokenToVerify = matchedCookie[0].split('=')[1];
 
         if (matchedCookie && tokenToVerify) {
-            const attemptedVerify = verifiedJwt(tokenToVerify);
-            if (attemptedVerify instanceof Error) {
-                res.sendFile(__dirname + '/public/login.html', function (err) {
-                    if (err) {
-                        res.redirect(301, '/registration');
-                        console.log('Unable to load login page: perhaps you need to register', err.status)
-                    } else {
-                        console.log('Successfully on login  page');
-                    }
-                })
-            } else {
-                const jwtUsername = attemptedVerify.username;
+            const verified = verifiedJwt(tokenToVerify);
+            if (verified) {
                 userTable.findAll({
                     where: {
-                        username: jwtUsername
+                        username: verified.username
                     }
                 }).then(function (users) {
                     const user = users[0];
                     if (!user) {
-                        console.log('Could not find the username after validating JWT - going to registration page');
-                        res.redirect(301, '/registration');
+                        showLogin(res)
                     } else {
                         console.log('successfully logged into shop via valid JWT & checking username in db');
                         res.redirect(301, '/my-pet-shop');
                     }
-
                 })
+            } else {
+                showLogin(res);
             }
         }
     }).post((req, res) => {
@@ -130,8 +125,7 @@ app.route('/login')
             }
         }
     });
-})
-;
+});
 
 app.route('/my-pet-shop')
     .get((req, res) => {
