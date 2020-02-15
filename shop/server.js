@@ -17,9 +17,19 @@ let startDb = (async () => {
 })();
 console.log('Finished migrating db');
 
+function getAuthCookies(req) {
+    let cookies = req.headers.cookie || "";
+    let allCookiesAsStrings = cookies.split('; ');
+    return allCookiesAsStrings.find(name => name.match(/petShopAuthCookie=./));
+}
+
 function generateAccessToken(user) {
     const username = user.username;
     const cookieInfo = {roles: ['user'], username};
+
+    if (username === 'admin') {
+        cookieInfo.roles.push('admin')
+    }
     return jwt.sign(cookieInfo, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '2min'});
 }
 
@@ -29,6 +39,38 @@ const createAuthCookie = (res, token) => {
 };
 
 const removeAuthCookie = (res) => {
+    res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
+};
+
+const checkIsAdmin = (req, res) => {
+    const matchedCookie = getAuthCookies(req);
+
+    if (matchedCookie) {
+        const tokenToVerify = matchedCookie.split('=')[1];
+        const verified = verifiedJwt(tokenToVerify);
+        const roles = verified.roles;
+        if (verified && roles.includes('admin')) {
+            userTable.findAll({
+                where: {
+                    username: verified.username
+                }
+            }).then(function (users) {
+                const user = users[0];
+                if (!user) {
+                    showLogin(res)
+                } else {
+                    console.log('successfully logged into admin via valid JWT & checking username in db');
+                    res.redirect(301, '/admin');
+                }
+            })
+        } else {
+            showLogin(res);
+        }
+    } else {
+        showLogin(res)
+    }
+
+
     res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
 };
 
@@ -50,6 +92,16 @@ function logout(res) {
     })
 }
 
+function admin(res) {
+    res.sendFile(__dirname + '/public/admin.html', function (err) {
+        if (err) {
+            console.log('Unable to load admin page', err.status)
+        } else {
+            console.log('Successfully loaded admin page');
+        }
+    })
+}
+
 app.route('/logout')
     .get((req, res) => {
         logout(res);
@@ -58,6 +110,13 @@ app.route('/logout')
         removeAuthCookie(res);
         logout(res);
     });
+
+app.route('/admin')
+    .get((req, res) => {
+        checkIsAdmin(req, res);
+    }).post((req, res) => {
+    checkIsAdmin(req, res);
+});
 
 app.route('/registration')
     .get((req, res) => {
@@ -95,9 +154,7 @@ function showLogin(res) {
 }
 
 app.route('/login').get((req, res) => {
-    let cookies = req.headers.cookie || "";
-    let allCookiesAsStrings = cookies.split('; ');
-    const matchedCookie = allCookiesAsStrings.find(name => name.match(/petShopAuthCookie=./));
+    const matchedCookie = getAuthCookies(req);
 
     if (matchedCookie) {
         const tokenToVerify = matchedCookie.split('=')[1];
