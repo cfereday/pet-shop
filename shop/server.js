@@ -159,7 +159,6 @@ app.route('/login').get((req, res) => {
     if (matchedCookie) {
         const tokenToVerify = matchedCookie.split('=')[1];
         const verified = verifiedJwt(tokenToVerify);
-        console.log('tokenToVerify', tokenToVerify);
         if (verified) {
             userTable.findAll({
                 where: {
@@ -181,32 +180,44 @@ app.route('/login').get((req, res) => {
         showLogin(res)
     }
 }).post((req, res) => {
-    const inputUsername = req.body.username;
-    const inputPassword = req.body.password;
+    const user = req.body;
+    const schema = Joi.object({
+        username: Joi.string().min(3).max(50).required(),
+        password: Joi.string().min(9).max(50).required()
+    });
+
+    const validation = schema.validate(user);
+    const inputUsername = validation.value.username;
+    const inputPassword = validation.value.password;
     let token;
 
-    userTable.findAll({
-        where: {
-            username: inputUsername
-        }
-    }).then(function (users) {
-        const user = users[0];
-        if (!user) {
-            console.log('Could not find the user');
-            res.redirect(301, '/something-went-wrong');
-        } else {
-            if (user.validPassword(inputPassword)) {
-                console.log('successfully logged in');
-                token = generateAccessToken(user);
-                createAuthCookie(res, token);
-                console.log('successfully created cookie');
-                res.redirect(301, '/my-pet-shop');
-            } else {
-                console.log('Could not find the password');
-                res.redirect(301, '/registration');
+    if (validation.error) {
+        console.log('Invalid data request - something went wrong validating');
+        res.redirect(301, '/something-went-wrong');
+    } else {
+        userTable.findAll({
+            where: {
+                username: inputUsername
             }
-        }
-    });
+        }).then(function (users) {
+            const user = users[0];
+            if (!user) {
+                console.log('Could not find the user');
+                res.redirect(301, '/something-went-wrong');
+            } else {
+                if (user.validPassword(inputPassword)) {
+                    console.log('successfully logged in');
+                    token = generateAccessToken(user);
+                    createAuthCookie(res, token);
+                    console.log('successfully created cookie');
+                    res.redirect(301, '/my-pet-shop');
+                } else {
+                    console.log('Could not find the password');
+                    res.redirect(301, '/registration');
+                }
+            }
+        });
+    }
 });
 
 app.route('/my-pet-shop')
