@@ -225,14 +225,7 @@ app.route('/my-pet-shop')
 
 app.route('/something-went-wrong')
     .get((req, res) => {
-        res.sendFile(__dirname + '/public/something-went-wrong.html', function (err) {
-            if (err) {
-                res.redirect(301, '/something-went-wrong.html');
-                console.log('Unable to load error page', err.status)
-            } else {
-                console.log('Successfully on error  page');
-            }
-        })
+        res.render('something-went-wrong.html', {title: 'Ooops something went wrong, navigate back to registration & try again. Hint a password needs to be at least 9 chars long'});
     });
 
 startDb.then(() => app.listen(4000));
