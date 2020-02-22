@@ -140,8 +140,6 @@ app.route('/registration')
     .get((req, res) => {
         res.render('registration.html', {title: 'Please register'});
     }).post((req, res) => {
-
-    console.log('hey made it to post registration here is my req body', req.body);
     const user = req.body;
     const validation = schema.validate(user);
     if (validation.error) {
