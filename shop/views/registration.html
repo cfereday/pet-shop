@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form method="post" action="/registration">
-    Username:<br>
-    <input type="text" name="username"><br>
-    Password:<br>
-    <input type="password" name="password">
-    <input type="submit" value="Submit">
+<form class="stack medium-box"  method="post" action="/registration">
+
+    <div class="horizontal space-between">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username">
+    </div>
+    <div class="horizontal space-between">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password">
+    </div>
+    <button type="submit" class="btn-primary">Submit</button>
 </form>
 {% endblock %}
 

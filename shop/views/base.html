@@ -1,9 +1,63 @@
 <! DOCTYPE html>
 <html>
-<head></head>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-css-reset/dist/reset.min.css"/>
+</head>
+<style>
+
+    :root {
+        --space-1: 1rem;
+        --space-2: 2rem;
+    }
+    .container {
+        max-width: 60ch;
+        margin-left: auto;
+        margin-right:auto;
+    }
+
+    body {
+        font-family: Helvetica sans-serif;
+        color: rgb(40, 40, 40);
+    }
+
+    .horizontal {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .space-between {
+        justify-content: space-between;
+    }
+
+    .medium-box {
+        max-width: 30ch;
+    }
+
+    .stack > * + * {
+        margin-top: var(--space-2);
+    }
+
+   h1 {
+       margin-bottom: var(--space-2);
+   }
+
+   .btn-primary {
+       background-color: #4299e1;
+       color: white;
+       padding: .5rem 1rem;
+       font-weight: 700;
+       border-radius: .25rem;
+   }
+
+   .btn-primary:hover {
+       background-color: #2b6cb0;
+   }
+</style>
 <body>
-<h1> {{ title }} </h1>
-{% block content %}
-{% endblock %}
+<div class="container">
+    <h1> {{ title }} </h1>
+    {% block content %}
+    {% endblock %}
+</div>
 </body>
 </html>

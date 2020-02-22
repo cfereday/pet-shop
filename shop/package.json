@@ -4,7 +4,7 @@
   "description": "An app to learn more about authentication & authorisation",
   "main": "index.js",
   "scripts": {
-    "devStart": "nodemon server.js",
+    "devStart": "nodemon --watch public --watch views -e js,html,json server.js",
     "test": "npm t",
     "requirements-check": "node checkNodeVersion.js",
     "postinstall": "npm run requirements-check"
