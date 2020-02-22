@@ -96,13 +96,7 @@ function showLogout(res) {
 }
 
 function showAdminPage(res) {
-    res.sendFile(__dirname + '/public/admin.html', function (err) {
-        if (err) {
-            console.log('Unable to load admin page', err.status)
-        } else {
-            console.log('Successfully loaded admin page');
-        }
-    })
+    res.render('admin.html', {title: 'Special Admin page: only for admins!'});
 }
 
 app.route('/logout')
