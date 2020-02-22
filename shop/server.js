@@ -211,14 +211,8 @@ app.route('/login').get((req, res) => {
 
 app.route('/my-pet-shop')
     .get((req, res) => {
-        res.sendFile(__dirname + '/public/my-pet-shop.html', function (err) {
-            if (err) {
-                res.redirect(301, '/login');
-                console.log('Unable to load login page', err.status)
-            } else {
-                console.log('Successfully on login  page');
-            }
-        })
+        res.render('my-pet-shop.html', {title: 'An amazing pet shop space: especially for you'});
+        console.log('successfully on login page');
     }).post((req, res) => {
     console.log('hey made it to post login here is my req body', req.body);
 });
