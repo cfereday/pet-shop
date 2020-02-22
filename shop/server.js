@@ -48,6 +48,19 @@ const removeAuthCookie = (res) => {
     res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
 };
 
+
+const kind = (user) => user === 'admin' ? 'admin' : 'user';
+
+function checkUserRole(verified) {
+    const roles = verified.roles;
+    const isAdmin = roles.includes('admin');
+    let userOrAdmin;
+
+    isAdmin ? userOrAdmin = 'admin' :  userOrAdmin = 'user';
+    return userOrAdmin;
+}
+
+
 const checkIsAdmin = (req, res) => {
     const matchedCookie = getAuthCookies(req);
 
@@ -209,15 +222,8 @@ app.route('/login').get((req, res) => {
     }
 });
 
-const kind = (user) => user === 'admin' ? 'admin' : 'user';
-
 function showPetshop(res, verified) {
-    const roles = verified.roles;
-    const isAdmin = roles.includes('admin');
-    let userOrAdmin;
-
-    isAdmin ? userOrAdmin = 'admin' :  userOrAdmin = 'user';
-    res.render('my-pet-shop.html', {username: verified.username, kindOfUser: kind(userOrAdmin)});
+    res.render('my-pet-shop.html', {username: verified.username, kindOfUser: kind(checkUserRole(verified))});
 }
 
 app.route('/my-pet-shop')
