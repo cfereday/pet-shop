@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form class="stack medium-box"  method="post" action="/login">
+
+    <div class="horizontal space-between">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username">
+    </div>
+    <div class="horizontal space-between">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password">
+    </div>
+    <button type="submit" class="btn-primary">Submit</button>
+</form>
+{% endblock %}

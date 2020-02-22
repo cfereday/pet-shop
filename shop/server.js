@@ -151,9 +151,7 @@ app.route('/registration')
 });
 
 function showLogin(res) {
-    return res.sendFile(__dirname + '/public/login.html', function (err) {
-        console.log('Failed sending login  page', err);
-    })
+    res.render('login.html', {title: 'Please login'});
 }
 
 app.route('/login').get((req, res) => {
