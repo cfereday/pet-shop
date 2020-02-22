@@ -227,23 +227,11 @@ function showPetshop(res, verified) {
 
 app.route('/my-pet-shop')
     .get((req, res) => {
-        let tokenToVerify;
-        const matchedCookie = getAuthCookies(req);
-
-        if (matchedCookie) {
-            tokenToVerify = matchedCookie.split('=')[1];
+        const verified = checkCookie(req);
+        if (verified) {
+            checkExpiry(verified) ? showPetshop(res, verified) : res.redirect('/login', 301);
         }
-
-        const verified = verifiedJwt(tokenToVerify);
-        if (verified && checkExpiry(verified)) {
-            showPetshop(res, verified);
-        } else {
-            res.redirect('/login', 301);
-        }
-        console.log('successfully on pet shop page');
-    }).post((req, res) => {
-    console.log('hey made it to post login here is my req body', req.body);
-});
+    });
 
 app.route('/something-went-wrong')
     .get((req, res) => {
