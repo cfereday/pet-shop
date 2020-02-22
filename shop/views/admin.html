@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}
-<h1> Special Admin page: only for admins! use your privilege with care, <em class="{{ kindOfUser }}">{{username}}!</em></h1>
+<h1 class="danger"> Special secret Admin page</h1>
+<h1>Use your privilege with care, <em class="{{ kindOfUser }}">{{username}}!</em></h1>
 {% endblock %}
-
 {% block content %}
 <form class="stack medium-box"  method="post" action="/logout">
     <button type="submit" class="btn-primary">Logout</button>

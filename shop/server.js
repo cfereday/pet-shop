@@ -109,7 +109,7 @@ function showLogout(res) {
 }
 
 function showAdminPage(res, verified) {
-    res.render('admin.html', {username: verified.username, kindOfUser: kind(checkUserRole(verified))});
+    res.render('admin.html', {username: verified.username, kindOfUser: 'admin'});
 }
 
 app.route('/logout')
