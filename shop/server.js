@@ -209,10 +209,22 @@ app.route('/login').get((req, res) => {
     }
 });
 
+function showPetshop(res, username) {
+    res.render('my-pet-shop.html', {title: `An amazing pet shop space: especially for you ${username} hellooo`});
+}
+
 app.route('/my-pet-shop')
     .get((req, res) => {
-        res.render('my-pet-shop.html', {title: 'An amazing pet shop space: especially for you'});
-        console.log('successfully on login page');
+        let tokenToVerify;
+        const matchedCookie = getAuthCookies(req);
+
+        if (matchedCookie) {
+            tokenToVerify = matchedCookie.split('=')[1];
+        }
+
+        const verified = verifiedJwt(tokenToVerify);
+        showPetshop(res, verified.username);
+        console.log('successfully on pet shop page');
     }).post((req, res) => {
     console.log('hey made it to post login here is my req body', req.body);
 });
