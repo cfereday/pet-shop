@@ -88,14 +88,15 @@ function findUserInDb(usernameToCheck) {
     });
 }
 
+const currentUser = (users) => users[0];
+
 const checkIsAdmin = (req, res) => {
     const verified = checkCookie(req);
     if (verified) {
         const roles = verified.roles;
         if (roles.includes('admin')) {
             findUserInDb(verified.username).then(function (users) {
-                const user = users[0];
-                if (!user || !checkExpiry(verified)) {
+                if (!currentUser(users) || !checkExpiry(verified)) {
                     res.redirect('/login', 301);
                 } else {
                     console.log('successfully logged into admin via valid JWT & checking username in db');
@@ -157,8 +158,7 @@ app.route('/login').get((req, res) => {
     const verified = checkCookie(req);
     if (verified) {
         findUserInDb(verified.username).then(function (users) {
-            const user = users[0];
-            if (!user || !checkExpiry(verified)) {
+            if (!currentUser(users) || !checkExpiry(verified)) {
                 showLogin(res)
             } else {
                 console.log('successfully logged into shop via valid JWT & checking username in db');
@@ -185,7 +185,7 @@ app.route('/login').get((req, res) => {
         res.redirect(301, '/something-went-wrong');
     } else {
         findUserInDb(inputUsername).then(function (users) {
-            const user = users[0];
+            const user = currentUser(users);
             if (!user) {
                 console.log('Could not find the user');
                 res.redirect(301, '/something-went-wrong');
@@ -223,7 +223,10 @@ app.route('/logout')
     .get((req, res) => {
         showLogout(res);
         removeAuthCookie(res);
-    });
+    }).post((req, res) => {
+    showLogout(res);
+    removeAuthCookie(res);
+});
 
 app.route('/something-went-wrong')
     .get((req, res) => {
