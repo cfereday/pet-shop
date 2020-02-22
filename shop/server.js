@@ -49,7 +49,9 @@ const checkIsAdmin = (req, res) => {
         const tokenToVerify = matchedCookie.split('=')[1];
         const verified = verifiedJwt(tokenToVerify);
         const roles = verified.roles;
+        console.log("I have made it to check if the user is an admin & then verified the roles");
         if (verified && roles.includes('admin')) {
+            console.log('the jwt is verified & the roles includes admin');
             userTable.findAll({
                 where: {
                     username: verified.username
@@ -57,20 +59,21 @@ const checkIsAdmin = (req, res) => {
             }).then(function (users) {
                 const user = users[0];
                 if (!user) {
-                    showLogin(res)
+                    res.redirect('/login', 301);
                 } else {
                     console.log('successfully logged into admin via valid JWT & checking username in db');
-                    res.redirect(301, '/admin');
+                    showAdminPage(res);
+                    return;
                 }
             })
         } else {
-            showLogin(res);
+            console.log('The made it to the bit where it do a test to find the user but could not validate the password');
+            res.redirect('/login', 301);
         }
     } else {
-        showLogin(res)
+        console.log('there was not a matched cookie so going to show login page');
+        res.redirect('/login', 301);
     }
-
-
     res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
 };
 
@@ -92,7 +95,7 @@ function logout(res) {
     })
 }
 
-function admin(res) {
+function showAdminPage(res) {
     res.sendFile(__dirname + '/public/admin.html', function (err) {
         if (err) {
             console.log('Unable to load admin page', err.status)
