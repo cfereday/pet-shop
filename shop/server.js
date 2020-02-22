@@ -131,6 +131,11 @@ function showPetshop(res, verified) {
     res.render('my-pet-shop.html', {username: verified.username, kindOfUser: kind(checkUserRole(verified))});
 }
 
+const schema = Joi.object({
+    username: Joi.string().min(3).max(50).required(),
+    password: Joi.string().min(9).max(50).required()
+});
+
 app.route('/registration')
     .get((req, res) => {
         res.render('registration.html', {title: 'Please register'});
@@ -138,11 +143,6 @@ app.route('/registration')
 
     console.log('hey made it to post registration here is my req body', req.body);
     const user = req.body;
-    const schema = Joi.object({
-        username: Joi.string().min(3).max(50).required(),
-        password: Joi.string().min(9).max(50).required()
-    });
-
     const validation = schema.validate(user);
     if (validation.error) {
         console.log('Invalid data request - something went wrong validating');
@@ -170,11 +170,6 @@ app.route('/login').get((req, res) => {
     }
 }).post((req, res) => {
     const user = req.body;
-    const schema = Joi.object({
-        username: Joi.string().min(3).max(50).required(),
-        password: Joi.string().min(9).max(50).required()
-    });
-
     const validated = schema.validate(user);
     const inputUsername = validated.value.username;
     const inputPassword = validated.value.password;
