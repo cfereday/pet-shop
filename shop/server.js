@@ -235,7 +235,7 @@ app.route('/my-pet-shop')
 
 app.route('/something-went-wrong')
     .get((req, res) => {
-        res.render('something-went-wrong.html', {title: 'Ooops something went wrong, navigate back to registration & try again. Hint a password needs to be at least 9 chars long'});
+        res.render('something-went-wrong.html');
     });
 
 startDb.then(() => app.listen(4000));
