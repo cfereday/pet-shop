@@ -81,7 +81,7 @@ const checkIsAdmin = (req, res) => {
                     res.redirect('/login', 301);
                 } else {
                     console.log('successfully logged into admin via valid JWT & checking username in db');
-                    showAdminPage(res);
+                    showAdminPage(res, verified);
                     return;
                 }
             })
@@ -108,8 +108,8 @@ function showLogout(res) {
     res.render('logout.html', {title: 'You are now logged out!'});
 }
 
-function showAdminPage(res) {
-    res.render('admin.html', {title: 'Special Admin page: only for admins!'});
+function showAdminPage(res, verified) {
+    res.render('admin.html', {username: verified.username, kindOfUser: kind(checkUserRole(verified))});
 }
 
 app.route('/logout')
