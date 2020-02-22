@@ -209,11 +209,15 @@ app.route('/login').get((req, res) => {
     }
 });
 
-// TODO Make this act on the roles of the user, not their name
 const kind = (user) => user === 'admin' ? 'admin' : 'user';
 
-function showPetshop(res, username) {
-    res.render('my-pet-shop.html', {username: username, kindOfUser: kind(username)});
+function showPetshop(res, verified) {
+    const roles = verified.roles;
+    const isAdmin = roles.includes('admin');
+    let userOrAdmin;
+
+    isAdmin ? userOrAdmin = 'admin' :  userOrAdmin = 'user';
+    res.render('my-pet-shop.html', {username: verified.username, kindOfUser: kind(userOrAdmin)});
 }
 
 app.route('/my-pet-shop')
@@ -226,7 +230,7 @@ app.route('/my-pet-shop')
         }
 
         const verified = verifiedJwt(tokenToVerify);
-        showPetshop(res, verified.username);
+        showPetshop(res, verified);
         console.log('successfully on pet shop page');
     }).post((req, res) => {
     console.log('hey made it to post login here is my req body', req.body);
