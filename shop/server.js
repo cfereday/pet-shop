@@ -36,7 +36,7 @@ function generateAccessToken(user) {
     if (username === 'admin') {
         cookieInfo.roles.push('admin')
     }
-    return jwt.sign(cookieInfo, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '2min'});
+    return jwt.sign(cookieInfo, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15min'});
 }
 
 const createAuthCookie = (res, token) => {
@@ -48,6 +48,9 @@ const removeAuthCookie = (res) => {
     res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
 };
 
+const checkExpiry = (validated) => {
+    return Date.now() < validated.exp * 1000;
+};
 
 const kind = (user) => user === 'admin' ? 'admin' : 'user';
 
@@ -69,7 +72,7 @@ const checkIsAdmin = (req, res) => {
         const verified = verifiedJwt(tokenToVerify);
         const roles = verified.roles;
         console.log("I have made it to check if the user is an admin & then verified the roles");
-        if (verified && roles.includes('admin')) {
+        if (verified && roles.includes('admin') && checkExpiry(verified)) {
             console.log('the jwt is verified & the roles includes admin');
             userTable.findAll({
                 where: {
@@ -161,7 +164,7 @@ app.route('/login').get((req, res) => {
     if (matchedCookie) {
         const tokenToVerify = matchedCookie.split('=')[1];
         const verified = verifiedJwt(tokenToVerify);
-        if (verified) {
+        if (verified && checkExpiry(verified)) {
             userTable.findAll({
                 where: {
                     username: verified.username
@@ -236,7 +239,11 @@ app.route('/my-pet-shop')
         }
 
         const verified = verifiedJwt(tokenToVerify);
-        showPetshop(res, verified);
+        if (verified && checkExpiry(verified)) {
+            showPetshop(res, verified);
+        } else {
+            res.redirect('/login', 301);
+        }
         console.log('successfully on pet shop page');
     }).post((req, res) => {
     console.log('hey made it to post login here is my req body', req.body);
