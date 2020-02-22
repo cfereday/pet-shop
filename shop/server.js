@@ -72,14 +72,10 @@ function checkCookie(req) {
 }
 
 const checkIsAdmin = (req, res) => {
-    const matchedCookie = getAuthCookies(req);
-
-    if (matchedCookie) {
-        const tokenToVerify = matchedCookie.split('=')[1];
-        const verified = verifiedJwt(tokenToVerify);
+    const verified = checkCookie(req);
+    if (verified) {
         const roles = verified.roles;
-        console.log("I have made it to check if the user is an admin & then verified the roles");
-        if (verified && roles.includes('admin') && checkExpiry(verified)) {
+        if (roles.includes('admin')) {
             console.log('the jwt is verified & the roles includes admin');
             userTable.findAll({
                 where: {
@@ -87,7 +83,7 @@ const checkIsAdmin = (req, res) => {
                 }
             }).then(function (users) {
                 const user = users[0];
-                if (!user) {
+                if (!user || !checkExpiry(verified)) {
                     res.redirect('/login', 301);
                 } else {
                     console.log('successfully logged into admin via valid JWT & checking username in db');
@@ -96,7 +92,7 @@ const checkIsAdmin = (req, res) => {
                 }
             })
         } else {
-            console.log('The made it to the bit where it do a test to find the user but could not validate the password');
+            console.log('there was not a matching user or jwt expired so going to show login page');
             res.redirect('/login', 301);
         }
     } else {
