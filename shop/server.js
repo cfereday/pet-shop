@@ -91,14 +91,8 @@ const verifiedJwt = (token) => {
     }
 };
 
-function logout(res) {
-    res.sendFile(__dirname + '/public/logout.html', function (err) {
-        if (err) {
-            console.log('Unable to load logout page', err.status)
-        } else {
-            console.log('Successfully loaded logout page');
-        }
-    })
+function showLogout(res) {
+    res.render('logout.html', {title: 'You are now logged out!'});
 }
 
 function showAdminPage(res) {
@@ -113,11 +107,11 @@ function showAdminPage(res) {
 
 app.route('/logout')
     .get((req, res) => {
-        logout(res);
+        showLogout(res);
     })
     .post((req, res) => {
         removeAuthCookie(res);
-        logout(res);
+        showLogout(res);
     });
 
 app.route('/admin')
