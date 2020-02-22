@@ -178,7 +178,12 @@ app.route('/my-pet-shop')
         if (verified) {
             checkExpiry(verified) ? showPetshop(res, verified) : res.redirect('/login', 301);
         }
-    });
+    }).post((req, res) => {
+    const verified = checkCookie(req);
+    if (verified) {
+        checkExpiry(verified) ? showPetshop(res, verified) : res.redirect('/login', 301);
+    }
+});
 
 const checkIsAdmin = (req, res) => {
     const verified = checkCookie(req);
