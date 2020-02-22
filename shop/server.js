@@ -209,8 +209,11 @@ app.route('/login').get((req, res) => {
     }
 });
 
+// TODO Make this act on the roles of the user, not their name
+const kind = (user) => user === 'admin' ? 'admin' : 'user';
+
 function showPetshop(res, username) {
-    res.render('my-pet-shop.html', {title: `An amazing pet shop space: especially for you ${username} hellooo`});
+    res.render('my-pet-shop.html', {username: username, kindOfUser: kind(username)});
 }
 
 app.route('/my-pet-shop')

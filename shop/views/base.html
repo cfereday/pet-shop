@@ -41,6 +41,19 @@
        margin-bottom: var(--space-2);
    }
 
+   .user {
+       --color: #4299e1;
+   }
+
+   .admin {
+       --color: red;
+   }
+
+   em {
+       color: var(--color);
+       border-bottom: 4px solid var(--color);
+   }
+
    .btn-primary {
        background-color: #4299e1;
        color: white;
@@ -55,7 +68,9 @@
 </style>
 <body>
 <div class="container">
+    {% block title %}
     <h1> {{ title }} </h1>
+    {% endblock %}
     {% block content %}
     {% endblock %}
 </div>

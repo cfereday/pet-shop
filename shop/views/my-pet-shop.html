@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block title %}
+<h1> An amazing pet shop space: especially for you <em class="{{ kindOfUser }}">{{username}}</em></h1>
+{% endblock %}
 
 {% block content %}
 <form class="stack medium-box"  method="post" action="/logout">
