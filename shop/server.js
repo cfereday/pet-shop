@@ -90,31 +90,6 @@ function findUserInDb(usernameToCheck) {
 
 const currentUser = (users) => users[0];
 
-const checkIsAdmin = (req, res) => {
-    const verified = checkCookie(req);
-    if (verified) {
-        const roles = verified.roles;
-        if (roles.includes('admin')) {
-            findUserInDb(verified.username).then(function (users) {
-                if (!currentUser(users) || !checkExpiry(verified)) {
-                    res.redirect('/login', 301);
-                } else {
-                    console.log('successfully logged into admin via valid JWT & checking username in db');
-                    showAdminPage(res, verified);
-                    return;
-                }
-            })
-        } else {
-            console.log('there was not a matching user or jwt expired so going to show login page');
-            res.redirect('/login', 301);
-        }
-    } else {
-        console.log('there was not a matched cookie so going to show login page');
-        res.redirect('/login', 301);
-    }
-    removeAuthCookie(res);
-};
-
 function showLogout(res) {
     res.render('logout.html', {title: 'You are now logged out!'});
 }
@@ -143,7 +118,7 @@ app.route('/registration')
     const user = req.body;
     const validation = schema.validate(user);
     if (validation.error) {
-        console.log('Invalid data request - something went wrong validating');
+        console.error('Invalid data request - something went wrong validating');
         res.redirect(301, '/something-went-wrong');
     } else {
         console.log('success you have a username & password that look ok');
@@ -180,7 +155,7 @@ app.route('/login').get((req, res) => {
         findUserInDb(inputUsername).then(function (users) {
             const user = currentUser(users);
             if (!user) {
-                console.log('Could not find the user');
+                console.error('Could not find the user');
                 res.redirect(301, '/something-went-wrong');
             } else {
                 if (user.validPassword(inputPassword)) {
@@ -189,7 +164,7 @@ app.route('/login').get((req, res) => {
                     console.log('successfully logged in');
                     res.redirect(301, '/my-pet-shop');
                 } else {
-                    console.log('Could not find the password');
+                    console.error('Could not find the password');
                     res.redirect(301, '/registration');
                 }
             }
@@ -204,6 +179,31 @@ app.route('/my-pet-shop')
             checkExpiry(verified) ? showPetshop(res, verified) : res.redirect('/login', 301);
         }
     });
+
+const checkIsAdmin = (req, res) => {
+    const verified = checkCookie(req);
+    if (verified) {
+        const roles = verified.roles;
+        if (roles.includes('admin')) {
+            findUserInDb(verified.username).then(function (users) {
+                if (!currentUser(users) || !checkExpiry(verified)) {
+                    res.redirect('/login', 301);
+                } else {
+                    console.log('successfully logged into admin via valid JWT & checking username in db');
+                    showAdminPage(res, verified);
+                    return;
+                }
+            })
+        } else {
+            console.error('there was not a matching user or jwt expired so going to show login page');
+            res.redirect('/login', 301);
+        }
+    } else {
+        console.log('there was not a matched cookie so going to show login page');
+        res.redirect('/login', 301);
+    }
+    removeAuthCookie(res);
+};
 
 app.route('/admin')
     .get((req, res) => {
