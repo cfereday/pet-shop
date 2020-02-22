@@ -23,12 +23,6 @@ let startDb = (async () => {
 })();
 console.log('Finished migrating db');
 
-function getAuthCookies(req) {
-    let cookies = req.headers.cookie || "";
-    let allCookiesAsStrings = cookies.split('; ');
-    return allCookiesAsStrings.find(name => name.match(/petShopAuthCookie=./));
-}
-
 function generateAccessToken(user) {
     const username = user.username;
     const cookieInfo = {roles: ['user'], username};
@@ -39,13 +33,12 @@ function generateAccessToken(user) {
     return jwt.sign(cookieInfo, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15min'});
 }
 
-const createAuthCookie = (res, token) => {
-    console.log('token in cookie', token);
-    res.cookie('petShopAuthCookie', `${token}`, {expires: token.expiresIn, httpOnly: true});
-};
-
-const removeAuthCookie = (res) => {
-    res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
+const verifiedJwt = (token) => {
+    try {
+        return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    } catch (err) {
+        return false;
+    }
 };
 
 const checkExpiry = (validated) => {
@@ -63,12 +56,36 @@ function checkUserRole(verified) {
     return userOrAdmin;
 }
 
+const createAuthCookie = (res, token) => {
+    console.log('token in cookie', token);
+    res.cookie('petShopAuthCookie', `${token}`, {expires: token.expiresIn, httpOnly: true});
+};
+
+
+function getAuthCookies(req) {
+    let cookies = req.headers.cookie || "";
+    let allCookiesAsStrings = cookies.split('; ');
+    return allCookiesAsStrings.find(name => name.match(/petShopAuthCookie=./));
+}
+
+const removeAuthCookie = (res) => {
+    res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
+};
+
 function checkCookie(req) {
     const matchedCookie = getAuthCookies(req);
     if (matchedCookie) {
         const tokenToVerify = matchedCookie.split('=')[1];
         return verifiedJwt(tokenToVerify);
     }
+}
+
+function findUserInDb(usernameToCheck) {
+    return userTable.findAll({
+        where: {
+            username: usernameToCheck
+        }
+    });
 }
 
 const checkIsAdmin = (req, res) => {
@@ -94,15 +111,7 @@ const checkIsAdmin = (req, res) => {
         console.log('there was not a matched cookie so going to show login page');
         res.redirect('/login', 301);
     }
-    res.cookie('petShopAuthCookie', '', {expires: new Date(), httpOnly: true})
-};
-
-const verifiedJwt = (token) => {
-    try {
-        return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    } catch (err) {
-        return false;
-    }
+    removeAuthCookie(res);
 };
 
 function showLogout(res) {
@@ -113,21 +122,13 @@ function showAdminPage(res, verified) {
     res.render('admin.html', {username: verified.username, kindOfUser: 'admin'});
 }
 
-app.route('/logout')
-    .get((req, res) => {
-        showLogout(res);
-    })
-    .post((req, res) => {
-        removeAuthCookie(res);
-        showLogout(res);
-    });
+function showLogin(res) {
+    res.render('login.html', {title: 'Please login'});
+}
 
-app.route('/admin')
-    .get((req, res) => {
-        checkIsAdmin(req, res);
-    }).post((req, res) => {
-    checkIsAdmin(req, res);
-});
+function showPetshop(res, verified) {
+    res.render('my-pet-shop.html', {username: verified.username, kindOfUser: kind(checkUserRole(verified))});
+}
 
 app.route('/registration')
     .get((req, res) => {
@@ -151,18 +152,6 @@ app.route('/registration')
         res.redirect(301, '/login');
     }
 });
-
-function showLogin(res) {
-    res.render('login.html', {title: 'Please login'});
-}
-
-function findUserInDb(usernameToCheck) {
-    return userTable.findAll({
-        where: {
-            username: usernameToCheck
-        }
-    });
-}
 
 app.route('/login').get((req, res) => {
     const verified = checkCookie(req);
@@ -215,16 +204,25 @@ app.route('/login').get((req, res) => {
     }
 });
 
-function showPetshop(res, verified) {
-    res.render('my-pet-shop.html', {username: verified.username, kindOfUser: kind(checkUserRole(verified))});
-}
-
 app.route('/my-pet-shop')
     .get((req, res) => {
         const verified = checkCookie(req);
         if (verified) {
             checkExpiry(verified) ? showPetshop(res, verified) : res.redirect('/login', 301);
         }
+    });
+
+app.route('/admin')
+    .get((req, res) => {
+        checkIsAdmin(req, res);
+    }).post((req, res) => {
+    checkIsAdmin(req, res);
+});
+
+app.route('/logout')
+    .get((req, res) => {
+        showLogout(res);
+        removeAuthCookie(res);
     });
 
 app.route('/something-went-wrong')
