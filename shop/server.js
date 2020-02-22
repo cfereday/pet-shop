@@ -6,6 +6,12 @@ const bodyParser = require('body-parser');
 const Joi = require('@hapi/joi');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const nunjucks = require('nunjucks');
+
+nunjucks.configure('views', {
+    autoescape: true,
+    express: app
+});
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -123,13 +129,7 @@ app.route('/admin')
 
 app.route('/registration')
     .get((req, res) => {
-        res.sendFile(__dirname + '/public/registration.html', function (err) {
-            if (err) {
-                console.log('Unable to load registration page', err.status)
-            } else {
-                console.log('Successfully loaded registration page');
-            }
-        })
+        res.render('registration.html', {title: 'Please register'});
     }).post((req, res) => {
 
     console.log('hey made it to post registration here is my req body', req.body);
