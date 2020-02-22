@@ -59,7 +59,7 @@ function checkUserRole(verified) {
     const isAdmin = roles.includes('admin');
     let userOrAdmin;
 
-    isAdmin ? userOrAdmin = 'admin' :  userOrAdmin = 'user';
+    isAdmin ? userOrAdmin = 'admin' : userOrAdmin = 'user';
     return userOrAdmin;
 }
 
@@ -76,12 +76,7 @@ const checkIsAdmin = (req, res) => {
     if (verified) {
         const roles = verified.roles;
         if (roles.includes('admin')) {
-            console.log('the jwt is verified & the roles includes admin');
-            userTable.findAll({
-                where: {
-                    username: verified.username
-                }
-            }).then(function (users) {
+            findUserInDb(verified.username).then(function (users) {
                 const user = users[0];
                 if (!user || !checkExpiry(verified)) {
                     res.redirect('/login', 301);
@@ -161,14 +156,18 @@ function showLogin(res) {
     res.render('login.html', {title: 'Please login'});
 }
 
+function findUserInDb(usernameToCheck) {
+    return userTable.findAll({
+        where: {
+            username: usernameToCheck
+        }
+    });
+}
+
 app.route('/login').get((req, res) => {
     const verified = checkCookie(req);
     if (verified) {
-        userTable.findAll({
-            where: {
-                username: verified.username
-            }
-        }).then(function (users) {
+        findUserInDb(verified.username).then(function (users) {
             const user = users[0];
             if (!user || !checkExpiry(verified)) {
                 showLogin(res)
@@ -187,30 +186,25 @@ app.route('/login').get((req, res) => {
         password: Joi.string().min(9).max(50).required()
     });
 
-    const validation = schema.validate(user);
-    const inputUsername = validation.value.username;
-    const inputPassword = validation.value.password;
+    const validated = schema.validate(user);
+    const inputUsername = validated.value.username;
+    const inputPassword = validated.value.password;
     let token;
 
-    if (validation.error) {
+    if (validated.error) {
         console.log('Invalid data request - something went wrong validating');
         res.redirect(301, '/something-went-wrong');
     } else {
-        userTable.findAll({
-            where: {
-                username: inputUsername
-            }
-        }).then(function (users) {
+        findUserInDb(inputUsername).then(function (users) {
             const user = users[0];
             if (!user) {
                 console.log('Could not find the user');
                 res.redirect(301, '/something-went-wrong');
             } else {
                 if (user.validPassword(inputPassword)) {
-                    console.log('successfully logged in');
                     token = generateAccessToken(user);
                     createAuthCookie(res, token);
-                    console.log('successfully created cookie');
+                    console.log('successfully logged in');
                     res.redirect(301, '/my-pet-shop');
                 } else {
                     console.log('Could not find the password');
