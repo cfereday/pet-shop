@@ -63,6 +63,13 @@ function checkUserRole(verified) {
     return userOrAdmin;
 }
 
+function checkCookie(req) {
+    const matchedCookie = getAuthCookies(req);
+    if (matchedCookie) {
+        const tokenToVerify = matchedCookie.split('=')[1];
+        return verifiedJwt(tokenToVerify);
+    }
+}
 
 const checkIsAdmin = (req, res) => {
     const matchedCookie = getAuthCookies(req);
@@ -159,30 +166,23 @@ function showLogin(res) {
 }
 
 app.route('/login').get((req, res) => {
-    const matchedCookie = getAuthCookies(req);
-
-    if (matchedCookie) {
-        const tokenToVerify = matchedCookie.split('=')[1];
-        const verified = verifiedJwt(tokenToVerify);
-        if (verified && checkExpiry(verified)) {
-            userTable.findAll({
-                where: {
-                    username: verified.username
-                }
-            }).then(function (users) {
-                const user = users[0];
-                if (!user) {
-                    showLogin(res)
-                } else {
-                    console.log('successfully logged into shop via valid JWT & checking username in db');
-                    res.redirect(301, '/my-pet-shop');
-                }
-            })
-        } else {
-            showLogin(res);
-        }
+    const verified = checkCookie(req);
+    if (verified) {
+        userTable.findAll({
+            where: {
+                username: verified.username
+            }
+        }).then(function (users) {
+            const user = users[0];
+            if (!user || !checkExpiry(verified)) {
+                showLogin(res)
+            } else {
+                console.log('successfully logged into shop via valid JWT & checking username in db');
+                res.redirect(301, '/my-pet-shop');
+            }
+        })
     } else {
-        showLogin(res)
+        showLogin(res);
     }
 }).post((req, res) => {
     const user = req.body;
