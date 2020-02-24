@@ -192,22 +192,24 @@ const checkIsAdmin = (req, res) => {
         if (roles.includes('admin')) {
             findUserInDb(verified.username).then(function (users) {
                 if (!currentUser(users) || !checkExpiry(verified)) {
+                    console.error('there was not a matching user or jwt expired so going to show login page');
+                    removeAuthCookie(res);
                     res.redirect('/login', 301);
                 } else {
                     console.log('successfully logged into admin via valid JWT & checking username in db');
                     showAdminPage(res, verified);
-                    return;
                 }
             })
         } else {
             console.error('there was not a matching user or jwt expired so going to show login page');
+            removeAuthCookie(res);
             res.redirect('/login', 301);
         }
     } else {
         console.log('there was not a matched cookie so going to show login page');
+        removeAuthCookie(res);
         res.redirect('/login', 301);
     }
-    removeAuthCookie(res);
 };
 
 app.route('/admin')
