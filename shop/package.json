@@ -38,7 +38,7 @@
     "pg-hstore": "^2.3.3",
     "postgres-migrations": "^4.0.0",
     "semver": "^7.1.1",
-    "sequelize": "^5.21.3"
+    "sequelize": "^6.19.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
